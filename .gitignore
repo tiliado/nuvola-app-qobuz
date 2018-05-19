@@ -1,0 +1,13 @@
+Makefile
+metadata.json
+icons
+/screenshots/
+nuvola-app-qobuz
+eu.tiliado.NuvolaAppQobuz.desktop
+eu.tiliado.NuvolaAppQobuz.service
+eu.tiliado.NuvolaAppQobuz.appdata.xml
+nuvola-app-qobuz.metainfo.xml
+eu.tiliado.WebRuntimeAppQobuz.desktop
+eu.tiliado.WebRuntimeAppQobuz.service
+eu.tiliado.WebRuntimeAppQobuz.appdata.xml
+nuvola-app-qobuz.metainfo.xml
