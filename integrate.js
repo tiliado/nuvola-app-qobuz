@@ -27,6 +27,7 @@
 (function (Nuvola) {
   // Create media player component
   var player = Nuvola.$object(Nuvola.MediaPlayer)
+  var volumeHandleRegex = /(\d+)px/
 
   // Handy aliases
   var PlaybackState = Nuvola.PlaybackState
@@ -50,7 +51,6 @@
   // Page is ready for magic
   WebApp._onPageReady = function () {
     // Actions
-    player.setCanChangeVolume(false) // TODO (I never use it)
     player.setCanRate(false) // No rating on Qobuz
 
     // Connect handler for signal ActionActivated
@@ -91,6 +91,18 @@
         Nuvola.log(`Error in setting track position: ${e}`)
       }
 
+      // Update volume level
+      try {
+        var volumeHandle = bottomPlayerContainer.querySelector('div.player-volume div.rangeslider__handle')
+        // The slider handle is hard-coded to be positioned at 80px on 100% volume
+        var match = volumeHandleRegex.exec(volumeHandle.style.left)
+        if (match && match.length) {
+          player.updateVolume(parseInt(match[1]) / 80)
+        }
+      } catch (e) {
+        Nuvola.log(`Error in getting volume level: ${e}`)
+      }
+
       // Update playback information
       var playbackState = PlaybackState.UNKNOWN
       try {
@@ -127,6 +139,7 @@
 
       player.setPlaybackState(playbackState)
       player.setCanSeek(playbackState !== PlaybackState.UNKNOWN)
+      player.setCanChangeVolume(playbackState !== PlaybackState.UNKNOWN)
     } catch (e) {
       Nuvola.log(`Error in WebApp.update: ${e}`)
     }
@@ -169,6 +182,12 @@
           if (param > 0 && param <= total) {
             Nuvola.clickOnElement(inputRange, param / total, 0.5)
           }
+          break
+        case PlayerAction.CHANGE_VOLUME:
+          var playerVolume = bottomPlayerContainer.querySelector('div.player-volume')
+          // This is not a mistake! They are nested
+          var rangeSlider = playerVolume.querySelector('div.rangeslider div.rangeslider')
+          Nuvola.clickOnElement(rangeSlider, param, 0.5)
           break
       }
     } catch (e) {
