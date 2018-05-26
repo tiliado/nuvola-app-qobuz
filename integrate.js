@@ -52,7 +52,6 @@
     // Actions
     player.setCanChangeVolume(false) // TODO (I never use it)
     player.setCanRate(false) // No rating on Qobuz
-    player.setCanSeek(false)  // TODO (hardly use it ever)
 
     // Connect handler for signal ActionActivated
     Nuvola.actions.connect('ActionActivated', this)
@@ -127,6 +126,7 @@
       }
 
       player.setPlaybackState(playbackState)
+      player.setCanSeek(playbackState !== PlaybackState.UNKNOWN)
     } catch (e) {
       Nuvola.log(`Error in WebApp.update: ${e}`)
     }
@@ -160,6 +160,15 @@
           break
         case PlayerAction.PREV_SONG:
           Nuvola.clickOnElement(playerAction.querySelector('span.pct-player-prev'))
+          break
+        case PlayerAction.SEEK:
+          // They were kind enough to use a <input type="range"> in seconds unit
+          // but changing its value won't make the track seek
+          var inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
+          var total = inputRange.max * 1000000 // In microseconds
+          if (param > 0 && param <= total) {
+            Nuvola.clickOnElement(inputRange, param / total, 0.5)
+          }
           break
       }
     } catch (e) {
