@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Bors, Ltd <github@bors-ltd.fr>
+ * Copyright 2018 Bors, Ltd <opensource@bors-ltd.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:

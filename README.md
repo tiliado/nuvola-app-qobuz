@@ -40,5 +40,5 @@ Copyright
     + License: [CC-BY-3.0](./LICENSE-CC-BY.txt)
 
   - Other files:
-    + Copyright 2018 Bors, Ltd <github@bors-ltd.fr>
+    + Copyright 2018 Bors, Ltd <opensource@bors-ltd.fr>
     + License: [2-Clause BSD-license](./LICENSE-BSD.txt)
