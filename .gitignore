@@ -11,3 +11,5 @@ eu.tiliado.WebRuntimeAppQobuz.desktop
 eu.tiliado.WebRuntimeAppQobuz.service
 eu.tiliado.WebRuntimeAppQobuz.appdata.xml
 nuvola-app-qobuz.metainfo.xml
+/.vscode/
+/node_modules/
