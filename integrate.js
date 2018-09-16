@@ -96,6 +96,16 @@
     return 1.0
   }
 
+
+  WebApp._getShuffle = function (playerControl) {
+    try {
+      return playerControl.querySelector('span.pct-shuffle').classList.contains('c2')
+    } catch (e) {
+      Nuvola.log(`Error in reading shuffle status: ${e}`)
+      return null
+    }
+  }
+
   WebApp._getCanGoNext = function (playerAction) {
     try {
       return !playerAction.querySelector('span.pct-player-next').classList.contains('disable')
@@ -144,6 +154,17 @@
         Nuvola.log(`Error in updating volume level: ${e}`)
       }
 
+      var playerControl = bottomPlayerContainer.querySelector('div.player-control')
+
+      // Update shuffle status
+      try {
+        var shuffle = this._getShuffle(playerControl)
+        Nuvola.actions.updateEnabledFlag(PlayerAction.SHUFFLE, shuffle !== null)
+        Nuvola.actions.updateState(PlayerAction.SHUFFLE, shuffle)
+      } catch (e) {
+        Nuvola.log(`Error in updating shuffle: ${e}`)
+      }
+
       var playerAction = bottomPlayerContainer.querySelector('div.player-action')
 
       // Update playback information
@@ -180,6 +201,8 @@
     try {
       var bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
       var playerAction = bottomPlayerContainer.querySelector('div.player-action')
+      var playerControl = bottomPlayerContainer.querySelector('div.player-control')
+
       switch (name) {
         case PlayerAction.NEXT_SONG:
           Nuvola.clickOnElement(playerAction.querySelector('span.pct-player-next'))
@@ -203,7 +226,7 @@
           break
         case PlayerAction.SEEK:
           // They were kind enough to use a <input type="range"> in seconds unit
-          // but changing its value won't make the track seek
+          // but changing its value won't make the track seek */
           var inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
           var total = inputRange.max * 1000000 // In microseconds
           if (param > 0 && param <= total) {
@@ -215,6 +238,9 @@
           // This is not a mistake! They are nested
           var rangeSlider = playerVolume.querySelector('div.rangerslider-horizontal-wrapper')
           Nuvola.clickOnElement(rangeSlider, param, 0.5)
+          break
+        case PlayerAction.SHUFFLE:
+          Nuvola.clickOnElement(playerControl.querySelector('span.pct-shuffle'))
           break
       }
     } catch (e) {
