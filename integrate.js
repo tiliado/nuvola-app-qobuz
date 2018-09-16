@@ -60,79 +60,106 @@
     this.update()
   }
 
+  WebApp._getTrack = function (bottomPlayerContainer, playerTimeData) {
+    var track = {}
+
+    try {
+      var playerTrack = bottomPlayerContainer.querySelector('div.player-track')
+      var currentAlbumData = playerTrack.querySelectorAll('span.current-album > a')
+
+      track.title = playerTrack.querySelector('span.current-track > span').textContent
+      track.artist = currentAlbumData[0].textContent
+      track.album = currentAlbumData[1].textContent
+      track.artLocation = bottomPlayerContainer.querySelector('div.player-cover > img').src
+      track.length = playerTimeData[1].textContent
+      // I could also report the current playlist but it's not (yet?) part of the Nuvola API
+    } catch (e) {
+      Nuvola.log(`Error in building track info: ${e}`)
+    }
+
+    // Return empty track data on error, to reset Nuvola display
+    return track
+  }
+
+  WebApp._getTrackPosition = function (playerTimeData) {
+    return playerTimeData[0].textContent
+  }
+
+  WebApp._getVolume = function (bottomPlayerContainer) {
+    var volumeHandle = bottomPlayerContainer.querySelector('div.player-volume div.rangeslider__handle')
+    // The slider handle is hard-coded to be positioned at 80px on 100% volume
+    var match = volumeHandleRegex.exec(volumeHandle.style.left)
+    if (match && match.length) {
+      return parseInt(match[1], 10) / 80
+    }
+
+    return 1.0
+  }
+
+  WebApp._getCanGoNext = function (playerAction) {
+    try {
+      return !playerAction.querySelector('span.pct-player-next').classList.contains('disable')
+    } catch (e) {
+      return false
+    }
+  }
+
+  WebApp._getCanPlay = function (playerAction) {
+    try {
+      return !!playerAction.querySelector('span.pct-player-play') // exists
+    } catch (e) {
+      return false
+    }
+  }
+
+  WebApp._getCanPause = function (playerAction) {
+    try {
+      return !!playerAction.querySelector('span.pct-player-pause') // exists
+    } catch (e) {
+      return false
+    }
+  }
+
   // Extract data from the web page
   WebApp.update = function () {
     try {
       // Wait for the bottom banner to be fully loaded on Qobuz bootstrap
       var bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
-      var playerTrack = bottomPlayerContainer.querySelector('div.player-track')
-      var currentAlbumData = playerTrack.querySelectorAll('span.current-album > a')
       var playerTimeData = bottomPlayerContainer.querySelectorAll('div.player-time div span')
 
-      // Update track information
-      var track = {}
-      try {
-        track.title = playerTrack.querySelector('span.current-track > span').textContent
-        track.artist = currentAlbumData[0].textContent
-        track.album = currentAlbumData[1].textContent
-        track.artLocation = bottomPlayerContainer.querySelector('div.player-cover > img').src
-        track.length = playerTimeData[1].textContent
-        // I could also report the current playlist but it's not (yet?) part of the Nuvola API
-      } catch (e) {
-        Nuvola.log(`Error in building track info: ${e}`)
-      }
-
-      player.setTrack(track)
+      // Update track information (always)
+      player.setTrack(this._getTrack(bottomPlayerContainer, playerTimeData))
 
       // Update track position
       try {
-        player.setTrackPosition(playerTimeData[0].textContent)
+        player.setTrackPosition(this._getTrackPosition(playerTimeData))
       } catch (e) {
         Nuvola.log(`Error in setting track position: ${e}`)
       }
 
       // Update volume level
       try {
-        var volumeHandle = bottomPlayerContainer.querySelector('div.player-volume div.rangeslider__handle')
-        // The slider handle is hard-coded to be positioned at 80px on 100% volume
-        var match = volumeHandleRegex.exec(volumeHandle.style.left)
-        if (match && match.length) {
-          player.updateVolume(parseInt(match[1]) / 80)
-        }
+        player.updateVolume(this._getVolume(bottomPlayerContainer))
       } catch (e) {
-        Nuvola.log(`Error in getting volume level: ${e}`)
+        Nuvola.log(`Error in updating volume level: ${e}`)
       }
+
+      var playerAction = bottomPlayerContainer.querySelector('div.player-action')
 
       // Update playback information
       var playbackState = PlaybackState.UNKNOWN
       try {
-        var playerAction = bottomPlayerContainer.querySelector('div.player-action')
-
         player.setCanGoPrev(true) // Never disabled to play it again, Sam
 
-        var enabled
-        try {
-          enabled = !playerAction.querySelector('span.pct-player-next').classList.contains('disable')
-        } catch (e) {
-          enabled = false
-        }
-        player.setCanGoNext(enabled)
+        player.setCanGoNext(this._getCanGoNext(playerAction))
 
-        try {
-          enabled = !!playerAction.querySelector('span.pct-player-play') // exists
-        } catch (e) {
-          enabled = false
-        }
-        player.setCanPlay(enabled)
-        if (enabled) playbackState = PlaybackState.PAUSED
+        var canPlay = this._getCanPlay(playerAction)
+        player.setCanPlay(canPlay)
+        if (canPlay) playbackState = PlaybackState.PAUSED
 
-        try {
-          enabled = !!playerAction.querySelector('span.pct-player-pause') // exists
-        } catch (e) {
-          enabled = false
-        }
-        player.setCanPause(enabled)
-        if (enabled) playbackState = PlaybackState.PLAYING
+        var canPause = this._getCanPause(playerAction)
+        player.setCanPause(canPause)
+        if (canPause) playbackState = PlaybackState.PLAYING
       } catch (e) {
         Nuvola.log(`Error in getting playback state: ${e}`)
       }
@@ -186,7 +213,7 @@
         case PlayerAction.CHANGE_VOLUME:
           var playerVolume = bottomPlayerContainer.querySelector('div.player-volume')
           // This is not a mistake! They are nested
-          var rangeSlider = playerVolume.querySelector('div.rangeslider div.rangeslider')
+          var rangeSlider = playerVolume.querySelector('div.rangerslider-horizontal-wrapper')
           Nuvola.clickOnElement(rangeSlider, param, 0.5)
           break
       }
