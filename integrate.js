@@ -106,6 +106,30 @@
     }
   }
 
+  WebApp._getRepeat = function (playerControl) {
+    try {
+      var repeat = Nuvola.PlayerRepeat.NONE
+      var repeatControl = playerControl.querySelector('span.pct-repeat')
+      if (repeatControl.classList.contains('c2')) {
+        repeat = Nuvola.PlayerRepeat.PLAYLIST
+        if (repeatControl.querySelector('span.repeat-one') !== null) {
+          repeat = Nuvola.PlayerRepeat.TRACK
+        }
+      }
+      return repeat
+    } catch (e) {
+      Nuvola.log(`Error in reading repeat status: ${e}`)
+      return null
+    }
+  }
+
+  WebApp._setRepeat = function (repeat, playerControl) {
+    var repeatControl = playerControl.querySelector('span.pct-repeat')
+    while (this._getRepeat(playerControl) !== repeat) {
+      Nuvola.clickOnElement(repeatControl)
+    }
+  }
+
   WebApp._getCanGoNext = function (playerAction) {
     try {
       return !playerAction.querySelector('span.pct-player-next').classList.contains('disable')
@@ -163,6 +187,15 @@
         Nuvola.actions.updateState(PlayerAction.SHUFFLE, shuffle)
       } catch (e) {
         Nuvola.log(`Error in updating shuffle: ${e}`)
+      }
+
+      // Update repeat status
+      try {
+        var repeat = this._getRepeat(playerControl)
+        Nuvola.actions.updateEnabledFlag(PlayerAction.REPEAT, repeat !== null)
+        Nuvola.actions.updateState(PlayerAction.REPEAT, repeat)
+      } catch (e) {
+        Nuvola.log(`Error in updating repeat: ${e}`)
       }
 
       var playerAction = bottomPlayerContainer.querySelector('div.player-action')
@@ -242,6 +275,8 @@
         case PlayerAction.SHUFFLE:
           Nuvola.clickOnElement(playerControl.querySelector('span.pct-shuffle'))
           break
+        case PlayerAction.REPEAT:
+          this._setRepeat(param, playerControl)
       }
     } catch (e) {
       Nuvola.log(`Error in WebApp._onActionActivated: ${e}`)

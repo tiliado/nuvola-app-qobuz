@@ -4,6 +4,7 @@ Qobuz App Change Log
 1.2 - unreleased
 ----------------
 
+  * Added support for repeating playlist or single track.
   * Added support for shuffle.
   * Update for the new Qobuz design.
 
