@@ -1,4 +1,4 @@
-Qobuz • Nuvola Apps Runtime
+Qobuz • Nuvola Apps Runtime [![CircleCI](https://circleci.com/gh/tiliado/nuvola-app-qobuz/tree/master.svg?style=svg)](https://circleci.com/gh/tiliado/nuvola-app-qobuz/tree/master)
 =================================
 
 Integration of Qobuz into your linux desktop via
