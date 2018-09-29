@@ -96,7 +96,6 @@
     return 1.0
   }
 
-
   WebApp._getShuffle = function (playerControl) {
     try {
       return playerControl.querySelector('span.pct-shuffle').classList.contains('c2')
