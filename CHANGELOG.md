@@ -1,8 +1,8 @@
 Qobuz App Change Log
 ====================
 
-1.2 - unreleased
-----------------
+1.2 - October 14th, 2018
+------------------------
 
   * Nuvola 4.13 is required.
   * Added support for repeating playlist or single track.
