@@ -1,6 +1,8 @@
 Qobuz App Change Log
 ====================
 
+* Quobuz is unsupported until a new maintainer is found. Issue: tiliado/nuvolaruntime#634
+
 1.2 - October 14th, 2018
 ------------------------
 
