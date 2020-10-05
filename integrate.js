@@ -1,4 +1,5 @@
 /*
+ * Copyright 2020 Romain Berger <romain.berger58@gmail.com>
  * Copyright 2018 Bors, Ltd <opensource@bors-ltd.fr>
  *
  * Redistribution and use in source and binary forms, with or without
