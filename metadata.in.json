@@ -18,6 +18,5 @@
       "src/icon-sm.svg 32 48"
     ]
   },
-  "allowed_uri": "^https?://(\\w+\\.qobuz\\.com/.*)",
-  "deprecation_url": "https://github.com/tiliado/nuvolaruntime/issues/634"
+  "allowed_uri": "^https?://(\\w+\\.qobuz\\.com/.*)"
 }
