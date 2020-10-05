@@ -40,5 +40,6 @@ Copyright
     + License: [CC-BY-3.0](./LICENSE-CC-BY.txt)
 
   - Other files:
+    + Copyright 2020 Romain Berger <romain.berger58@gmail.com>
     + Copyright 2018 Bors, Ltd <opensource@bors-ltd.fr>
     + License: [2-Clause BSD-license](./LICENSE-BSD.txt)
