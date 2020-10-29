@@ -1,8 +1,8 @@
 Qobuz App Change Log
 ====================
 
-Unreleased
-----------
+1.3 - October 29th, 2020
+------------------------
 
   * New maintainer Romain Berger. Issue: tiliado/nuvolaruntime#634
   * Support the new Qobuz design.
