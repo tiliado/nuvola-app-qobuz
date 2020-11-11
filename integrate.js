@@ -27,21 +27,21 @@
 
 (function (Nuvola) {
   // Create media player component
-  var player = Nuvola.$object(Nuvola.MediaPlayer)
-  var volumeHandleRegex = /(\d+)px/
+  const player = Nuvola.$object(Nuvola.MediaPlayer)
+  const volumeHandleRegex = /(\d+)px/
 
   // Handy aliases
-  var PlaybackState = Nuvola.PlaybackState
-  var PlayerAction = Nuvola.PlayerAction
+  const PlaybackState = Nuvola.PlaybackState
+  const PlayerAction = Nuvola.PlayerAction
 
   // Create new WebApp prototype
-  var WebApp = Nuvola.$WebApp()
+  const WebApp = Nuvola.$WebApp()
 
   // Initialization routines
   WebApp._onInitWebWorker = function (emitter) {
     Nuvola.WebApp._onInitWebWorker.call(this, emitter)
 
-    var state = document.readyState
+    const state = document.readyState
     if (state === 'interactive' || state === 'complete') {
       this._onPageReady()
     } else {
@@ -62,10 +62,10 @@
   }
 
   WebApp._getTrack = function (bottomPlayerContainer, playerTimeData) {
-    var track = {}
+    const track = {}
 
     try {
-      var currentAlbumData = bottomPlayerContainer.querySelectorAll('span.player__inner__container1__track__album > div > a')
+      const currentAlbumData = bottomPlayerContainer.querySelectorAll('span.player__inner__container1__track__album > div > a')
 
       track.title = bottomPlayerContainer.querySelector('span.player__inner__container1__track__name > div').textContent
       track.artist = currentAlbumData[0].textContent
@@ -86,9 +86,9 @@
   }
 
   WebApp._getVolume = function (bottomPlayerContainer) {
-    var volumeHandle = bottomPlayerContainer.querySelector('div.player__inner__container2__volume__slider div.rangeslider__fill')
+    const volumeHandle = bottomPlayerContainer.querySelector('div.player__inner__container2__volume__slider div.rangeslider__fill')
     // The slider fill is hard-coded to be positioned at 95px on 100% volume
-    var match = volumeHandleRegex.exec(volumeHandle.style.width)
+    const match = volumeHandleRegex.exec(volumeHandle.style.width)
     if (match && match.length) {
       return parseInt(match[1], 10) / 95
     }
@@ -107,7 +107,7 @@
 
   WebApp._getRepeat = function (playerControl) {
     try {
-      var repeat = Nuvola.PlayerRepeat.NONE
+      let repeat = Nuvola.PlayerRepeat.NONE
       if (playerControl.querySelector('span.pct-repeat.c2') !== null) {
         repeat = Nuvola.PlayerRepeat.PLAYLIST
       } else if (playerControl.querySelector('span.pct-repeat-once.c2') !== null) {
@@ -121,7 +121,7 @@
   }
 
   WebApp._setRepeat = function (repeat, playerControl) {
-    var repeatControl = playerControl.querySelector('span.pct-repeat, span.pct-repeat-once')
+    const repeatControl = playerControl.querySelector('span.pct-repeat, span.pct-repeat-once')
     while (this._getRepeat(playerControl) !== repeat) {
       Nuvola.clickOnElement(repeatControl)
     }
@@ -155,8 +155,8 @@
   WebApp.update = function () {
     try {
       // Wait for the bottom banner to be fully loaded on Qobuz bootstrap
-      var bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
-      var playerTimeData = bottomPlayerContainer.querySelectorAll('div.player__inner__container1__time > div > span')
+      const bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
+      const playerTimeData = bottomPlayerContainer.querySelectorAll('div.player__inner__container1__time > div > span')
 
       // Update track information (always)
       player.setTrack(this._getTrack(bottomPlayerContainer, playerTimeData))
@@ -175,11 +175,11 @@
         Nuvola.log(`Error in updating volume level: ${e}`)
       }
 
-      var appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
+      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
 
       // Update shuffle status
       try {
-        var shuffle = this._getShuffle(appPlayerAction)
+        const shuffle = this._getShuffle(appPlayerAction)
         Nuvola.actions.updateEnabledFlag(PlayerAction.SHUFFLE, shuffle !== null)
         Nuvola.actions.updateState(PlayerAction.SHUFFLE, shuffle)
       } catch (e) {
@@ -188,7 +188,7 @@
 
       // Update repeat status
       try {
-        var repeat = this._getRepeat(appPlayerAction)
+        const repeat = this._getRepeat(appPlayerAction)
         Nuvola.actions.updateEnabledFlag(PlayerAction.REPEAT, repeat !== null)
         Nuvola.actions.updateState(PlayerAction.REPEAT, repeat)
       } catch (e) {
@@ -196,17 +196,17 @@
       }
 
       // Update playback information
-      var playbackState = PlaybackState.UNKNOWN
+      let playbackState = PlaybackState.UNKNOWN
       try {
         player.setCanGoPrev(true) // Never disabled to play it again, Sam
 
         player.setCanGoNext(this._getCanGoNext(appPlayerAction))
 
-        var canPlay = this._getCanPlay(appPlayerAction)
+        const canPlay = this._getCanPlay(appPlayerAction)
         player.setCanPlay(canPlay)
         if (canPlay) playbackState = PlaybackState.PAUSED
 
-        var canPause = this._getCanPause(appPlayerAction)
+        const canPause = this._getCanPause(appPlayerAction)
         player.setCanPause(canPause)
         if (canPause) playbackState = PlaybackState.PLAYING
       } catch (e) {
@@ -227,8 +227,8 @@
   // Handler of playback actions
   WebApp._onActionActivated = function (emitter, name, param) {
     try {
-      var bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
-      var appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
+      const bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
+      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
 
       switch (name) {
         case PlayerAction.NEXT_SONG:
@@ -251,19 +251,21 @@
         case PlayerAction.PREV_SONG:
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-prev'))
           break
-        case PlayerAction.SEEK:
+        case PlayerAction.SEEK: {
           // They were kind enough to use a <input type="range"> in seconds unit
           // but changing its value won't make the track seek */
-          var inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
-          var total = inputRange.max * 1000000 // In microseconds
+          const inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
+          const total = inputRange.max * 1000000 // In microseconds
           if (param > 0 && param <= total) {
             Nuvola.clickOnElement(inputRange, param / total, 0.5)
           }
           break
-        case PlayerAction.CHANGE_VOLUME:
-          var rangeSlider = bottomPlayerContainer.querySelector('div.rangerslider-horizontal-wrapper')
+        }
+        case PlayerAction.CHANGE_VOLUME: {
+          const rangeSlider = bottomPlayerContainer.querySelector('div.rangerslider-horizontal-wrapper')
           Nuvola.clickOnElement(rangeSlider, param, 0.5)
           break
+        }
         case PlayerAction.SHUFFLE:
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-shuffle'))
           break
