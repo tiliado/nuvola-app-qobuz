@@ -61,17 +61,17 @@
     this.update()
   }
 
-  WebApp._getTrack = function (bottomPlayerContainer, playerTimeData) {
+  WebApp._getTrack = function (bottomPlayerContainer) {
     const track = {}
 
     try {
-      const currentAlbumData = bottomPlayerContainer.querySelectorAll('span.player__inner__container1__track__album > div > a')
+      const currentAlbumData = bottomPlayerContainer.querySelectorAll('div.player__track-album > a')
 
-      track.title = bottomPlayerContainer.querySelector('span.player__inner__container1__track__name > div').textContent
+      track.title = bottomPlayerContainer.querySelector('div.player__track-overflow').textContent
       track.artist = currentAlbumData[0].textContent
       track.album = currentAlbumData[1].textContent
-      track.artLocation = bottomPlayerContainer.querySelector('div.player__inner__container1__cover > img').src
-      track.length = playerTimeData[2].textContent
+      track.artLocation = bottomPlayerContainer.querySelector('div.player__track-cover > img').src
+      track.length = bottomPlayerContainer.querySelector('span.player__track-time-text:last-child').textContent
       // I could also report the current playlist but it's not (yet?) part of the Nuvola API
     } catch (e) {
       Nuvola.log(`Error in building track info: ${e}`)
@@ -81,12 +81,12 @@
     return track
   }
 
-  WebApp._getTrackPosition = function (playerTimeData) {
-    return playerTimeData[0].textContent
+  WebApp._getTrackPosition = function (bottomPlayerContainer) {
+    return bottomPlayerContainer.querySelector('span.player__track-time-text:first-child').textContent
   }
 
   WebApp._getVolume = function (bottomPlayerContainer) {
-    const volumeHandle = bottomPlayerContainer.querySelector('div.player__inner__container2__volume__slider div.rangeslider__fill')
+    const volumeHandle = bottomPlayerContainer.querySelector('div.player__settings-volume-slider div.rangeslider__fill')
     // The slider fill is hard-coded to be positioned at 95px on 100% volume
     const match = volumeHandleRegex.exec(volumeHandle.style.width)
     if (match && match.length) {
@@ -98,7 +98,7 @@
 
   WebApp._getShuffle = function (playerControl) {
     try {
-      return playerControl.querySelector('span.pct-shuffle').classList.contains('c2')
+      return playerControl.querySelector('span.player__action-shuffle').className.includes('active')
     } catch (e) {
       Nuvola.log(`Error in reading shuffle status: ${e}`)
       return null
@@ -108,10 +108,12 @@
   WebApp._getRepeat = function (playerControl) {
     try {
       let repeat = Nuvola.PlayerRepeat.NONE
-      if (playerControl.querySelector('span.pct-repeat.c2') !== null) {
-        repeat = Nuvola.PlayerRepeat.PLAYLIST
-      } else if (playerControl.querySelector('span.pct-repeat-once.c2') !== null) {
-        repeat = Nuvola.PlayerRepeat.TRACK
+      if (playerControl.querySelector('span.player__action-repeat--active') !== null) {
+        if (playerControl.querySelector('span.pct-repeat-once') !== null) {
+          repeat = Nuvola.PlayerRepeat.TRACK
+        } else {
+          repeat = Nuvola.PlayerRepeat.PLAYLIST
+        }
       }
       return repeat
     } catch (e) {
@@ -156,14 +158,13 @@
     try {
       // Wait for the bottom banner to be fully loaded on Qobuz bootstrap
       const bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
-      const playerTimeData = bottomPlayerContainer.querySelectorAll('div.player__inner__container1__time > div > span')
 
       // Update track information (always)
-      player.setTrack(this._getTrack(bottomPlayerContainer, playerTimeData))
+      player.setTrack(this._getTrack(bottomPlayerContainer))
 
       // Update track position
       try {
-        player.setTrackPosition(this._getTrackPosition(playerTimeData))
+        player.setTrackPosition(this._getTrackPosition(bottomPlayerContainer))
       } catch (e) {
         Nuvola.log(`Error in setting track position: ${e}`)
       }
@@ -175,7 +176,7 @@
         Nuvola.log(`Error in updating volume level: ${e}`)
       }
 
-      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
+      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__action')
 
       // Update shuffle status
       try {
@@ -228,7 +229,7 @@
   WebApp._onActionActivated = function (emitter, name, param) {
     try {
       const bottomPlayerContainer = document.querySelector('div#bottomPlayerContainer')
-      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__inner__action')
+      const appPlayerAction = bottomPlayerContainer.querySelector('div.player__action')
 
       switch (name) {
         case PlayerAction.NEXT_SONG:
@@ -257,7 +258,9 @@
           const inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
           const total = inputRange.max * 1000000 // In microseconds
           if (param > 0 && param <= total) {
-            Nuvola.clickOnElement(inputRange, param / total, 0.5)
+            Nuvola.triggerMouseEvent(inputRange, 'mousedown', param / total, 0.5)
+            inputRange.value = Math.round(param / 1000000)
+            Nuvola.triggerMouseEvent(inputRange, 'mouseup', param / total, 0.5)
           }
           break
         }

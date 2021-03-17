@@ -1,6 +1,11 @@
 Qobuz App Change Log
 ====================
 
+Unreleased
+----------
+
+  * Support Qobuz design v5.8.0-b021
+
 1.3 - October 29th, 2020
 ------------------------
 
