@@ -4,7 +4,10 @@ Qobuz App Change Log
 Unreleased
 ----------
 
-  * Support Qobuz design v5.8.0-b021
+  * Support Qobuz design v5.8.0-b021.
+  * Added personalized icon set.
+  * Added support for seek.
+  * Improve support for stop.
 
 1.3 - October 29th, 2020
 ------------------------

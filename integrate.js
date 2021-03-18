@@ -153,6 +153,20 @@
     }
   }
 
+  WebApp._setSeek = function (param, bottomPlayerContainer) {
+    // They were kind enough to use a <input type="range"> in seconds unit
+    const inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
+    const total = inputRange.max * 1000000 // In microseconds
+    if (param >= 0 && param <= total) {
+      // stop progessbar update
+      Nuvola.triggerMouseEvent(inputRange, 'mousedown', param / total, 0.5)
+      // set new value to seek
+      inputRange.value = Math.round(param / 1000000)
+      // restart update with mouse button release
+      Nuvola.triggerMouseEvent(inputRange, 'mouseup', param / total, 0.5)
+    }
+  }
+
   // Extract data from the web page
   WebApp.update = function () {
     try {
@@ -236,8 +250,13 @@
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-next'))
           break
         case PlayerAction.PAUSE:
-        case PlayerAction.STOP:
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-pause'))
+          break
+        case PlayerAction.STOP:
+          if (appPlayerAction.querySelector('span.pct-player-pause') !== null) {
+            Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-pause'))
+          }
+          this._setSeek(0, bottomPlayerContainer)
           break
         case PlayerAction.PLAY:
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-play'))
@@ -253,15 +272,7 @@
           Nuvola.clickOnElement(appPlayerAction.querySelector('span.pct-player-prev'))
           break
         case PlayerAction.SEEK: {
-          // They were kind enough to use a <input type="range"> in seconds unit
-          // but changing its value won't make the track seek */
-          const inputRange = bottomPlayerContainer.querySelector('#inputTypeRange input')
-          const total = inputRange.max * 1000000 // In microseconds
-          if (param > 0 && param <= total) {
-            Nuvola.triggerMouseEvent(inputRange, 'mousedown', param / total, 0.5)
-            inputRange.value = Math.round(param / 1000000)
-            Nuvola.triggerMouseEvent(inputRange, 'mouseup', param / total, 0.5)
-          }
+          this._setSeek(param, bottomPlayerContainer)
           break
         }
         case PlayerAction.CHANGE_VOLUME: {
