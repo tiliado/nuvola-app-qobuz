@@ -1,8 +1,8 @@
 Qobuz App Change Log
 ====================
 
-Unreleased
-----------
+1.4 - April 11th, 2021
+----------------------
 
   * Support Qobuz design v5.8.0-b021.
   * Added personalized icon set.
